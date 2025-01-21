@@ -11,6 +11,8 @@ import (
 	"github.com/joho/godotenv"
 )
 
+var Reset = "\033[0m" 
+var Green = "\033[32m" 
 
 func main() {
     err := godotenv.Load()
@@ -49,7 +51,12 @@ func main() {
 
     fmt.Println("Due Assignments: -------------------------")
     for _, x := range assignments {
-	fmt.Printf("Class: %s | Due: %s (%s), Name: %s\n", api.GetCourseName(x.Assignment.CourseID),  x.Assignment.DueAt.In(tz).Format("Jan 2 03:04 PM"), x.Assignment.DueAt.In(tz).Format("01/02/06"), x.Assignment.Name)
+	out := fmt.Sprintf("Class: %s | Due: %s (%s), Name: %s", api.GetCourseName(x.Assignment.CourseID),  x.Assignment.DueAt.In(tz).Format("Jan 2 03:04 PM"), x.Assignment.DueAt.In(tz).Format("01/02/06"), x.Assignment.Name)
+	if x.Assignment.HasSubmittedSubmissions {
+	    out = fmt.Sprintf("%s%s%s", Green, out, Reset)
+	}
+
+	fmt.Println(out)
     }
 
 }
