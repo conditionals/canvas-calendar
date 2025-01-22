@@ -52,7 +52,8 @@ func main() {
     fmt.Println("Due Assignments: -------------------------")
     for _, x := range assignments {
 	out := fmt.Sprintf("Class: %s | Due: %s (%s), Name: %s", api.GetCourseName(x.Assignment.CourseID),  x.Assignment.DueAt.In(tz).Format("Jan 2 03:04 PM"), x.Assignment.DueAt.In(tz).Format("01/02/06"), x.Assignment.Name)
-	if x.Assignment.HasSubmittedSubmissions {
+	
+	if x.Assignment.UserSubmitted || x.Assignment.GradedSubmissionsExist {
 	    out = fmt.Sprintf("%s%s%s", Green, out, Reset)
 	}
 
