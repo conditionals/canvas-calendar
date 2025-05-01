@@ -13,6 +13,7 @@ import (
 
 var Reset = "\033[0m"
 var Green = "\033[32m"
+var Red = "\033[31m"
 
 func main() {
 	tz, err := time.LoadLocation("America/New_York")
@@ -36,6 +37,12 @@ func main() {
 		result := promptCLI()
 		switch result {
 		case 1:
+			if len(entries) == 0 {
+			    printRed("Error. No accounts found")
+			    break
+			}
+
+
 			var assignments []api.CanvasAssignment
 			for _, entry := range entries {
 				user := &api.CanvasUser{
@@ -56,48 +63,51 @@ func main() {
 			newEntry.BearerToken = getInput()
 
 			entries = append(entries, newEntry)
+			writeCSV(&entries)
+		case 3:
+		   printEntries(entries)
+		   fmt.Println("What entry would you like to remove? (-1 to exit)")
+		   handleRemove(&entries, getInt());
+
 		case 4:
-			for i := 0; i < len(entries); i++ {
-				fmt.Printf("%s: %s\n", entries[i].Domain, entries[i].BearerToken)
-			}
+		    printEntries(entries)
 		case 5:
-			os.Exit(0)
+		    writeCSV(&entries)
+		    os.Exit(0)
+		default:
+		    printRed("Invalid input.")
 		}
 	}
 }
 
 func promptCLI() int {
 	fmt.Println("\nWhat would you like to do?")
-	fmt.Println("1. Print due assignments (default)")
+	fmt.Println("1. Print due assignments")
 	fmt.Println("2. Add a canvas logon")
 	fmt.Println("3. Remove a canvas logon")
 	fmt.Println("4. List current canvas logons")
 	fmt.Println("5. Exit")
-	fmt.Print("Enter selection: ")
+	fmt.Print("\nEnter selection: ")
 
 	var num int
 
 	_, err := fmt.Scanln(&num)
 	fmt.Println()
-	if err != nil {
-		return 1
-	}
-
-	if num > 5 || num < 0 {
-		return 1
+	if err != nil || num > 5 || num < 0{
+		return -1
 	}
 
 	return num
 }
 
-func writeCSV(data []*Entry) {
+func writeCSV(data *[]Entry) {
 	file, err := os.Create("list.csv")
 	if err != nil {
 		panic(err)
 	}
 	defer file.Close()
 
-	if err := gocsv.MarshalFile(&data, file); err != nil {
+	if err := gocsv.MarshalFile(data, file); err != nil {
 		panic(err)
 	}
 
@@ -129,9 +139,40 @@ func getInput() string {
 	var data string
 	_, err := fmt.Scanln(&data)
 	if err != nil {
-		fmt.Println("Error reading input. Please try again.")
+		printRed("Error reading input. Please try again.")
 		return getInput()
 	}
 
 	return data
+}
+
+func getInt() int {
+    var data int
+    fmt.Printf("Enter your number: ")
+
+    _, err := fmt.Scan(&data)
+    if err != nil {
+	return getInt()	
+    }
+
+    return data
+}
+
+func printEntries(entries []Entry) {
+	for i := 0; i < len(entries); i++ {
+	    fmt.Printf("%d. %s: %s\n", i+1, entries[i].Domain, entries[i].BearerToken)
+	}
+}
+
+func handleRemove(entries *[]Entry, index int) {
+    i := index - 1
+    if i < 0 || i >= len(*entries) {
+	return 
+    }
+
+    *entries = append((*entries)[:i], (*entries)[i+1:]...)
+}
+
+func printRed(s string) {
+    fmt.Printf("%s%s%s\n", Red, s, Reset)
 }

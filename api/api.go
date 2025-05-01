@@ -95,7 +95,7 @@ func (u *CanvasUser) formatCalendarRequestURL() string {
 
     endDate := time.Now().Add(time.Hour * 24 * 7).Format(time.RFC3339)
 
-   withDates := fmt.Sprintf("%s?end_date=%s&type=assignment%s", endpointURL, endDate, u.fetchFormattedClasses())
+    withDates := fmt.Sprintf("%s?end_date=%s&type=assignment%s", endpointURL, endDate, u.fetchFormattedClasses())
 
     return withDates 
 }

@@ -2,6 +2,7 @@ package api
 
 import "time"
 
+// attribution: https://mholt.github.io/json-to-go/
 
 type CanvasUser struct {
     Url string
